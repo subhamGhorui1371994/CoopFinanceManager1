@@ -1,32 +1,19 @@
 import { Switch, Route, Redirect } from "wouter";
-import { AppShell, Burger, Group, Text, UnstyledButton, Stack, NavLink, Title, Container } from '@mantine/core';
+import { AppShell, Burger, Group, Text, NavLink, Title, Container } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconBuilding, IconUsers, IconCoin, IconReceipt, IconPiggyBank, IconChartBar, IconLogout, IconSchool } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { IconBuilding, IconUsers, IconCoin, IconReceipt, IconWallet, IconChartBar, IconDashboard } from '@tabler/icons-react';
 import { useLocation } from "wouter";
 
 // Import pages
-import MantineLogin from "@/pages/mantine-login";
-import Dashboard from "@/pages/dashboard";
-import Organizations from "@/pages/organizations";
-import Members from "@/pages/members";
-import Loans from "@/pages/loans";
-import Repayments from "@/pages/repayments";
-import Contributions from "@/pages/contributions";
-import Reports from "@/pages/reports";
-import NotFound from "@/pages/not-found";
-
-interface User {
-  id: string;
-  email: string;
-  user_metadata?: {
-    name?: string;
-    role?: string;
-    organizationId?: number;
-    isAdmin?: boolean;
-    isSuperAdmin?: boolean;
-  };
-}
+import MantineLogin from "./pages/mantine-login";
+import Dashboard from "./pages/dashboard";
+import Organizations from "./pages/organizations";
+import Members from "./pages/members";
+import Loans from "./pages/loans";
+import Repayments from "./pages/repayments";
+import Contributions from "./pages/contributions";
+import Reports from "./pages/reports";
+import NotFound from "./pages/not-found";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -49,6 +36,61 @@ function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
+interface LayoutProps {
+  children: React.ReactNode;
+  title: string;
+}
+
+function Layout({ children, title }: LayoutProps) {
+  const [opened, { toggle }] = useDisclosure();
+  const [location, setLocation] = useLocation();
+
+  const navigationItems = [
+    { icon: IconDashboard, label: 'Dashboard', path: '/' },
+    { icon: IconBuilding, label: 'Organizations', path: '/organizations' },
+    { icon: IconUsers, label: 'Members', path: '/members' },
+    { icon: IconCoin, label: 'Loans', path: '/loans' },
+    { icon: IconReceipt, label: 'Repayments', path: '/repayments' },
+    { icon: IconWallet, label: 'Contributions', path: '/contributions' },
+    { icon: IconChartBar, label: 'Reports', path: '/reports' },
+  ];
+
+  return (
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{ width: 250, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <Title order={3}>CoopLoan Management</Title>
+        </Group>
+      </AppShell.Header>
+
+      <AppShell.Navbar p="md">
+        {navigationItems.map((item) => (
+          <NavLink
+            key={item.path}
+            href={item.path}
+            label={item.label}
+            leftSection={<item.icon size="1rem" />}
+            active={location === item.path}
+            onClick={() => setLocation(item.path)}
+          />
+        ))}
+      </AppShell.Navbar>
+
+      <AppShell.Main>
+        <Container size="xl">
+          <Title order={2} mb="md">{title}</Title>
+          {children}
+        </Container>
+      </AppShell.Main>
+    </AppShell>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -59,7 +101,7 @@ function Router() {
       <Route path="/">
         {() => (
           <ProtectedRoute>
-            <Layout title="Dashboard" subtitle="Overview of your cooperative system">
+            <Layout title="Dashboard">
               <Dashboard />
             </Layout>
           </ProtectedRoute>
@@ -69,7 +111,7 @@ function Router() {
       <Route path="/organizations">
         {() => (
           <ProtectedRoute adminOnly>
-            <Layout title="Organizations" subtitle="Manage cooperative organizations">
+            <Layout title="Organizations">
               <Organizations />
             </Layout>
           </ProtectedRoute>
@@ -79,7 +121,7 @@ function Router() {
       <Route path="/members">
         {() => (
           <ProtectedRoute>
-            <Layout title="Member Management" subtitle="Manage cooperative members and permissions">
+            <Layout title="Member Management">
               <Members />
             </Layout>
           </ProtectedRoute>
@@ -89,7 +131,7 @@ function Router() {
       <Route path="/loans">
         {() => (
           <ProtectedRoute>
-            <Layout title="Loan Management" subtitle="Manage member loans and applications">
+            <Layout title="Loan Management">
               <Loans />
             </Layout>
           </ProtectedRoute>
@@ -99,7 +141,7 @@ function Router() {
       <Route path="/repayments">
         {() => (
           <ProtectedRoute>
-            <Layout title="Repayment Management" subtitle="Track and manage loan repayments">
+            <Layout title="Repayment Management">
               <Repayments />
             </Layout>
           </ProtectedRoute>
@@ -109,7 +151,7 @@ function Router() {
       <Route path="/contributions">
         {() => (
           <ProtectedRoute>
-            <Layout title="Monthly Contributions" subtitle="Track and manage member contributions">
+            <Layout title="Monthly Contributions">
               <Contributions />
             </Layout>
           </ProtectedRoute>
@@ -119,7 +161,7 @@ function Router() {
       <Route path="/reports">
         {() => (
           <ProtectedRoute>
-            <Layout title="Reports & Analytics" subtitle="Comprehensive financial reports and insights">
+            <Layout title="Reports & Analytics">
               <Reports />
             </Layout>
           </ProtectedRoute>
@@ -133,14 +175,7 @@ function Router() {
 }
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  return <Router />;
 }
 
 export default App;

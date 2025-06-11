@@ -16,8 +16,6 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconSchool, IconAlertCircle } from '@tabler/icons-react';
-import { supabase } from '../lib/supabase';
-
 export default function MantineLogin() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
@@ -29,8 +27,8 @@ export default function MantineLogin() {
       password: '',
     },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      password: (value) => (value.length > 0 ? null : 'Password is required'),
+      email: (value: string) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      password: (value: string) => (value.length > 0 ? null : 'Password is required'),
     },
   });
 
@@ -38,24 +36,19 @@ export default function MantineLogin() {
     setLoading(true);
     setError('');
 
+    // Mock authentication - replace with actual Supabase when keys are provided
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (error) {
-        setError(error.message);
-        return;
-      }
-
-      if (data.user) {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      if (values.email === 'admin@cooploan.com' && values.password === 'admin123') {
         notifications.show({
           title: 'Success',
           message: 'Logged in successfully',
           color: 'green',
         });
         setLocation('/');
+      } else {
+        setError('Invalid email or password');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');
