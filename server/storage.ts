@@ -198,8 +198,15 @@ export class MemStorage implements IStorage {
   async createMember(member: InsertMember): Promise<Member> {
     const id = this.currentId.members++;
     const newMember: Member = {
-      ...member,
       id,
+      name: member.name,
+      email: member.email,
+      password: member.password,
+      organizationId: member.organizationId || null,
+      isAdmin: member.isAdmin ?? false,
+      canAddMembers: member.canAddMembers ?? false,
+      isSuperAdmin: member.isSuperAdmin ?? false,
+      isActive: member.isActive ?? true,
       joinDate: new Date(),
     };
     this.members.set(id, newMember);
@@ -309,8 +316,13 @@ export class MemStorage implements IStorage {
     const totalAmount = monthlyPayment * loanData.termMonths;
     
     const newLoan: Loan = {
-      ...loanData,
       id,
+      memberId: loanData.memberId,
+      amount: loanData.amount,
+      interestRate: loanData.interestRate,
+      termMonths: loanData.termMonths,
+      purpose: loanData.purpose,
+      status: "pending",
       monthlyPayment: monthlyPayment.toFixed(2),
       totalAmount: totalAmount.toFixed(2),
       remainingBalance: loanData.amount,
