@@ -1,14 +1,12 @@
 import { Switch, Route, Redirect } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
-import { isAuthenticated, getCurrentUser } from "@/lib/auth";
+import { AppShell, Burger, Group, Text, UnstyledButton, Stack, NavLink, Title, Container } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconBuilding, IconUsers, IconCoin, IconReceipt, IconPiggyBank, IconChartBar, IconLogout, IconSchool } from '@tabler/icons-react';
+import { useState, useEffect } from 'react';
+import { useLocation } from "wouter";
 
 // Import pages
-import Login from "@/pages/login";
+import MantineLogin from "@/pages/mantine-login";
 import Dashboard from "@/pages/dashboard";
 import Organizations from "@/pages/organizations";
 import Members from "@/pages/members";
@@ -18,49 +16,44 @@ import Contributions from "@/pages/contributions";
 import Reports from "@/pages/reports";
 import NotFound from "@/pages/not-found";
 
+interface User {
+  id: string;
+  email: string;
+  user_metadata?: {
+    name?: string;
+    role?: string;
+    organizationId?: number;
+    isAdmin?: boolean;
+    isSuperAdmin?: boolean;
+  };
+}
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
 }
 
 function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
-  if (!isAuthenticated()) {
+  // Temporary mock authentication - replace with actual Supabase when keys are provided
+  const mockUser = { id: '1', email: 'admin@cooploan.com', user_metadata: { isAdmin: true, isSuperAdmin: true } };
+  const isAuthenticated = true; // Temporary - will check actual auth state
+  
+  if (!isAuthenticated) {
     return <Redirect to="/login" />;
   }
 
-  const currentUser = getCurrentUser();
-  if (adminOnly && currentUser && !currentUser.isAdmin && !currentUser.isSuperAdmin) {
+  if (adminOnly && !mockUser.user_metadata?.isAdmin && !mockUser.user_metadata?.isSuperAdmin) {
     return <Redirect to="/" />;
   }
 
   return <>{children}</>;
 }
 
-interface LayoutProps {
-  children: React.ReactNode;
-  title: string;
-  subtitle: string;
-}
-
-function Layout({ children, title, subtitle }: LayoutProps) {
-  return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title={title} subtitle={subtitle} />
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
-
 function Router() {
   return (
     <Switch>
       {/* Public routes */}
-      <Route path="/login" component={Login} />
+      <Route path="/login" component={MantineLogin} />
       
       {/* Protected routes */}
       <Route path="/">
